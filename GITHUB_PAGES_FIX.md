@@ -1,42 +1,37 @@
-# GitHub Pages Routing Fix
+# Quick Fix for GitHub Pages Deployment
 
-## What Changed
+## Issue
+Getting `NS_ERROR_CORRUPTED_CONTENT` on GitHub Pages - trying to load source files instead of built files.
 
-I've fixed the blank page issue by switching from `BrowserRouter` to `HashRouter`. This is the recommended approach for GitHub Pages since it doesn't require server-side routing configuration.
+## Solution
 
-## Changes Made
+1. **Added `.nojekyll` file** in `public/` folder
+   - Tells GitHub Pages not to process files with Jekyll
+   - Ensures all files (including those starting with `_`) are served correctly
 
-1. **src/App.jsx**: Changed `BrowserRouter` → `HashRouter`
-2. **vite.config.js**: Updated `base` path to `/`
+2. **Updated `vite.config.js`** to use `base: './'`
+   - Use relative paths for better compatibility with custom domains
 
-## Your URLs Will Now Use Hash Routing
+## Deploy the Fix
 
-- Homepage: `https://yoursite.com/#/`
-- Dashboard: `https://yoursite.com/#/dashboard`
-- Connect: `https://yoursite.com/#/connect`
+```bash
+git add .
+git commit -m "fix: add .nojekyll and update base path for GitHub Pages"
+git push origin main
+```
 
-The `#` symbol enables client-side routing without server configuration.
+Wait 1-2 minutes for GitHub Actions to rebuild, then:
+1. **Hard refresh** your browser (Ctrl+Shift+R or Cmd+Shift+R)
+2. Or try in **incognito mode**
 
-## Next Steps
+## If Still Not Working
 
-1. **Commit and push these changes**:
-   ```bash
-   git add .
-   git commit -m "fix: switch to HashRouter for GitHub Pages compatibility"
-   git push origin main
-   ```
+Check GitHub Actions:
+1. Go to your repo → **Actions** tab
+2. Check if the build is completing successfully
+3. Look for any error messages in the build logs
 
-2. **Wait for GitHub Actions to rebuild** (check the Actions tab in your repo)
-
-3. **Clear your browser cache** or try incognito mode
-
-4. **Visit your site** - it should now work!
-
-## Alternative (if you prefer clean URLs without #)
-
-If you want URLs without the hash (e.g., `/dashboard` instead of `/#/dashboard`), you'll need to:
-1. Keep `BrowserRouter`
-2. Create a `404.html` workaround (redirects to index.html)
-3. Accept that direct navigation to routes might have issues
-
-Let me know if you want the clean URL approach instead!
+Also verify:
+- GitHub Pages is enabled (Settings → Pages)
+- Source is set to "GitHub Actions"
+- Your custom domain DNS is configured correctly
