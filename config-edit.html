@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DH Config Manager</title>
+    <style>
+        :root {
+            --bg-body: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-input: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --border: #475569;
+            --radius: 8px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 300px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            flex-shrink: 0;
+        }
+
+        .auth-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .auth-section input {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .config-type-selector {
+            display: flex;
+            margin-bottom: 1rem;
+            background: var(--bg-input);
+            padding: 0.25rem;
+            border-radius: var(--radius);
+        }
+
+        .config-type-opt {
+            flex: 1;
+            text-align: center;
+            padding: 0.4rem;
+            cursor: pointer;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .config-type-opt.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            background-color: var(--primary);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn.danger {
+            background-color: var(--danger);
+        }
+
+        .btn.success {
+            background-color: var(--success);
+        }
+
+        .btn.secondary {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+        }
+
+        .btn.secondary:hover {
+            background-color: var(--border);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            width: auto;
+        }
+
+        h2,
+        h3 {
+            margin: 0 0 1rem 0;
+            font-weight: 600;
+        }
+
+        #config-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .config-item {
+            padding: 0.75rem;
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .config-item:hover {
+            background: var(--border);
+        }
+
+        .config-item.active {
+            border: 1px solid var(--primary);
+            background: var(--bg-panel);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .required-mark {
+            color: var(--danger);
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 0.6rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: var(--radius);
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+
+        .section-card {
+            background: var(--bg-panel);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-input);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--success);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Range Slider Styles */
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .range-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            background: var(--bg-input);
+            height: 6px;
+            border-radius: 4px;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .range-value {
+            width: 50px;
+            text-align: right;
+            font-family: monospace;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem;
+            font-size: 0.8rem;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+        }
+
+        #toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        #toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Modal */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-overlay.hidden {
+            display: none;
+        }
+
+        .sentence-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sentence-input {
+            flex: 1;
+            /* Match standard input styles */
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text-main);
+            border-radius: var(--radius);
+        }
+
+        .btn-icon {
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.2rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-icon:hover {
+            opacity: 0.8;
+        }
+
+        .btn-icon.danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .modal-content {
+            background: var(--bg-panel);
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside>
+        <div class="auth-section">
+            <h3>Config Manager</h3>
+            <div class="config-type-selector">
+                <div class="config-type-opt active" onclick="switchMode('dh')" id="mode-dh">DH Config</div>
+                <div class="config-type-opt" onclick="switchMode('a2f')" id="mode-a2f">A2F Config</div>
+                <div class="config-type-opt" onclick="switchMode('customize')" id="mode-customize">Customize</div>
+            </div>
+            <label>Auth Token (JWT)</label>
+            <input type="password" id="auth-token" placeholder="Paste Bearer Token here"
+                value="eyJhbGci....">
+            <button class="btn" onclick="fetchConfigs()">Load Configs</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-muted); font-size: 0.875rem;" id="list-label">Available Configs</span>
+            <button class="btn btn-sm success" onclick="startNewConfig()">+ New</button>
+        </div>
+        <div id="config-list">
+            <!-- populated by js -->
+            <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+                Enter token to load.
+            </div>
+        </div>
+    </aside>
+
+    <main id="main-editor" class="hidden">
+        <div class="editor-header">
+            <h2 id="editor-title">Edit Config</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn danger" onclick="deleteCurrentConfig()">Delete</button>
+                <button class="btn success" onclick="saveConfig()">Save Changes</button>
+            </div>
+        </div>
+
+        <!-- DH Config Form -->
+        <form id="dh-config-form" class="config-form">
+            <!-- Core Settings -->
+            <div class="section-card">
+                <h3>Core Settings</h3>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Config ID <span class="required-mark">*</span></label>
+                        <input type="text" name="config_id" id="dh-config_id" readonly>
+                    </div>
+                    <div class="field-group">
+                        <label>Bot ID <span class="required-mark">*</span></label>
+                        <input type="text" name="botid" placeholder="68ef116e8596ddfa50f9ce64">
+                    </div>
+                    <div class="field-group">
+                        <label>Destination Flow <span class="required-mark">*</span></label>
+                        <input type="text" name="destinationflow" placeholder="IN_greeting">
+                    </div>
+
+                    <div class="field-group"><label>A2F Config (Ref)</label><input type="text" name="a2f_config"
+                            placeholder="default"></div>
+                    <div class="field-group"><label>Customize (Ref)</label><input type="text" name="customize"
+                            placeholder="default_theme"></div>
+
+                    <div class="field-group"><label>Project Name</label><input type="text" name="projectname"
+                            placeholder="DigitalHuman"></div>
+                    <div class="field-group"><label>User ID</label><input type="text" name="userid"
+                            placeholder="MetaDefault"></div>
+                    <div class="field-group"><label>ASR Timeout</label><input type="number" name="asrtimeout"
+                            placeholder="40"></div>
+                    <div class="field-group"><label>Session Timeout</label><input type="number" name="sessiontimeout"
+                            placeholder="9999"></div>
+
+                    <div class="field-group">
+                        <label>Is Anim</label>
+                        <select name="isanim">
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASR Settings -->
+            <div class="section-card">
+                <h3>ASR Settings</h3>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>ASR Provider</label>
+                        <select name="asrprovider">
+                            <option value="elevenlabs">ElevenLabs</option>
+                            <option value="botnoi">Botnoi</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>ASR Language</label>
+                        <select name="asrlanguage">
+                            <option value="th-TH">Thai</option>
+                            <option value="en-US">English</option>
+                            <option value="fil-PH">Filipino</option>
+                            <option value="pt-BR">Portuguese</option>
+                            <option value="en-SG">Singapore</option>
+                            <option value="tr-TR">Turkish</option>
+                            <option value="lo-LA">Lao</option>
+                            <option value="zh-CN">Chinese</option>
+                            <option value="vi-VN">Vietnamese</option>
+                            <option value="id-ID">Indonesian</option>
+                            <option value="de-DE">German</option>
+                            <option value="fr-FR">French</option>
+                            <option value="ru-RU">Russian</option>
+                            <option value="my-MM">Burmese</option>
+                            <option value="km-KH">Cambodia</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="ms-MY">Malaysian</option>
+                            <option value="nl-NL">Dutch</option>
+                            <option value="ko-KR">Korean</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="it-IT">Italian</option>
+                            <option value="ja-JP">Japanese</option>
+                            <option value="ar-SA">Arabic</option>
+                        </select>
+                    </div>
+                    <div class="field-group"><label>Mic Active Delay</label><input type="number" step="0.1"
+                            name="micactivedelay" placeholder="0.5"></div>
+                    <div class="field-group"><label>ASR VAD False Block</label><input type="number"
+                            name="asrvadfalseblock" placeholder="20"></div>
+                    <div class="field-group"><label>ASR VAD False Timeout</label><input type="number" step="0.1"
+                            name="asrvadfalsetimeout" placeholder="1.5"></div>
+                    <div class="field-group"><label>ASR VAD True Block</label><input type="number"
+                            name="asrvadtrueblock" placeholder="50"></div>
+                    <div class="field-group">
+                        <label>PS Audio</label>
+                        <select name="psaudio">
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TTS Settings -->
+            <div class="section-card">
+                <h3>TTS Settings</h3>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>TTS Provider</label>
+                        <select name="ttsprovider">
+                            <option value="botnoi">Botnoi</option>
+                            <option value="elevenlabs">ElevenLabs</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Speaker Language</label>
+                        <select name="speakerlanguage">
+                            <option value="th">Thai</option>
+                            <option value="en">English</option>
+                            <option value="fil">Filipino</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="en-SG">Singapore</option>
+                            <option value="tr">Turkish</option>
+                            <option value="lo">Lao</option>
+                            <option value="zh">Chinese</option>
+                            <option value="vi">Vietnamese</option>
+                            <option value="id">Indonesian</option>
+                            <option value="de">German</option>
+                            <option value="fr">French</option>
+                            <option value="ru">Russian</option>
+                            <option value="my">Burmese</option>
+                            <option value="km">Cambodia</option>
+                            <option value="es">Spanish</option>
+                            <option value="ms">Malaysian</option>
+                            <option value="nl">Dutch</option>
+                            <option value="ko">Korean</option>
+                            <option value="hi">Hindi</option>
+                            <option value="it">Italian</option>
+                            <option value="ja">Japanese</option>
+                            <option value="ar">Arabic</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Speaker ID</label>
+                        <!-- Text Input for standard use -->
+                        <input type="text" id="field-speakerid-text" name="speakerid" placeholder="39">
+                        <!-- Select for ElevenLabs -->
+                        <select id="field-speakerid-elevenlabs" class="hidden">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sheet Config -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Sheet Config</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-sheet" onchange="toggleSection('sheet')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="section-sheet" class="form-grid hidden">
+                    <div class="field-group"><label>Spreadsheet ID</label><input type="text" class="sheet-input"
+                            name="sheet.spreadsheet_id" placeholder="16mEfquegafSdcsCpnkv8..."></div>
+                    <div class="field-group"><label>Range Name</label><input type="text" class="sheet-input"
+                            name="sheet.range_name" placeholder="Bot!B:E"></div>
+                    <div class="field-group"><label>Poll Interval (s)</label><input type="number" class="sheet-input"
+                            name="sheet.poll_interval_seconds" placeholder="10"></div>
+                    <div class="field-group"><label>Prefix</label><input type="text" class="sheet-input"
+                            name="sheet.prefix" placeholder=""></div>
+                    <div class="field-group"><label>Item Template</label><input type="text" class="sheet-input"
+                            name="sheet.item" placeholder="คุณ {col1} จาก {col3}"></div>
+                    <div class="field-group"><label>Joiner</label><input type="text" class="sheet-input"
+                            name="sheet.joiner" placeholder=", "></div>
+                    <div class="field-group"><label>Last Joiner</label><input type="text" class="sheet-input"
+                            name="sheet.last_joiner" placeholder="และ"></div>
+                    <div class="field-group"><label>Suffix</label><input type="text" class="sheet-input"
+                            name="sheet.suffix" placeholder="ได้ทำการลงทะเบียนเรียบร้อยแล้ว"></div>
+                    <div class="field-group">
+                        <label>Enabled</label>
+                        <select class="sheet-input" name="sheet.enabled">
+                            <option value="true">True</option>
+                            <option value="false">False</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Idle Config -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Idle Config</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-idle" onchange="toggleSection('idle')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="section-idle" class="hidden">
+                    <div class="form-grid" style="margin-bottom: 1rem;">
+                        <div class="field-group">
+                            <label>Enabled</label>
+                            <select class="idle-input" name="idle_config.enabled">
+                                <option value="true" selected>True</option>
+                                <option value="false">False</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Random</label>
+                            <select class="idle-input" name="idle_config.random">
+                                <option value="true" selected>True</option>
+                                <option value="false">False</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Min Interval (s)</label>
+                            <input type="number" class="idle-input" name="idle_config.min_interval" placeholder="10">
+                        </div>
+                        <div class="field-group">
+                            <label>Max Interval (s)</label>
+                            <input type="number" class="idle-input" name="idle_config.max_interval" placeholder="30">
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Sentences</label>
+                        <div id="sentences-list"></div>
+                        <button type="button" class="btn secondary" onclick="addSentenceRow('')"
+                            style="margin-top:0.5rem; width:100%">+ Add Sentence</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TTS Inject Config -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>TTS Inject Config</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-tts" onchange="toggleSection('tts')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div style="margin-bottom:0.5rem; font-size:0.8rem; color: var(--text-muted);">
+                    * Required if Sheet or Idle config is enabled.
+                </div>
+                <div id="section-tts" class="form-grid hidden">
+                    <div class="field-group"><label>Auth Token</label><input type="text" class="tts-input"
+                            name="tts_inject_config.auth_token" placeholder="eyJhbG..."></div>
+                    <div class="field-group"><label>Callback URL</label><input type="text" class="tts-input"
+                            name="tts_inject_config.callback_url" placeholder="https://..."></div>
+                    <div class="field-group"><label>Provider</label><input type="text" class="tts-input"
+                            name="tts_inject_config.provider" placeholder="botnoi"></div>
+                    <div class="field-group"><label>Speaker</label><input type="text" class="tts-input"
+                            name="tts_inject_config.speaker" placeholder="523"></div>
+                </div>
+            </div>
+        </form>
+
+        <!-- A2F Config Form -->
+        <form id="a2f-config-form" class="config-form hidden">
+            <!-- Core Settings -->
+            <div class="section-card">
+                <h3>A2F Config</h3>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Config ID <span class="required-mark">*</span></label>
+                        <input type="text" name="a2f_id" id="a2f-config_id" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="section-card">
+                <h3>Parameters</h3>
+                <div class="form-grid" id="a2f-parameters-container">
+                    <!-- Populated via Javascript based on definition -->
+                </div>
+            </div>
+
+            <!-- Emotions -->
+            <div class="section-card">
+                <h3>Emotions</h3>
+                <div class="form-grid" id="a2f-emotions-header-container">
+                    <!-- General Emotion Settings -->
+                </div>
+                <h4 style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">Emotion Overrides
+                </h4>
+                <div class="form-grid" id="a2f-emotions-overrides-container">
+                    <!-- Dynamic Emotion Overrides -->
+                </div>
+            </div>
+        </form>
+
+        <!-- Customize Config Form -->
+        <form id="customize-config-form" class="config-form hidden">
+            <div class="section-card">
+                <h3>Customize Config</h3>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Config ID <span class="required-mark">*</span></label>
+                        <input type="text" id="customize-config_id" readonly>
+                    </div>
+                    <div class="field-group">
+                        <label>Model</label>
+                        <input type="text" name="customize.model" placeholder="Charmi">
+                    </div>
+                    <div class="field-group">
+                        <label>Clothes</label>
+                        <input type="text" name="customize.clothes" placeholder="Suit">
+                    </div>
+                </div>
+
+                <h4
+                    style="margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    Accessories</h4>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Hat</label>
+                        <input type="number" name="customize.acc.hat" placeholder="0">
+                    </div>
+                    <div class="field-group">
+                        <label>Face</label>
+                        <input type="number" name="customize.acc.face" placeholder="0">
+                    </div>
+                    <div class="field-group">
+                        <label>Earring</label>
+                        <input type="number" name="customize.acc.earring" placeholder="0">
+                    </div>
+                </div>
+
+                <h4
+                    style="margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    Colors</h4>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));">
+                    <div class="field-group">
+                        <label>Color 1</label>
+                        <input type="color" name="customize.color.0" style="height: 42px; padding: 2px; width: 100%;">
+                    </div>
+                    <div class="field-group">
+                        <label>Color 2</label>
+                        <input type="color" name="customize.color.1" style="height: 42px; padding: 2px; width: 100%;">
+                    </div>
+                    <div class="field-group">
+                        <label>Color 3</label>
+                        <input type="color" name="customize.color.2" style="height: 42px; padding: 2px; width: 100%;">
+                    </div>
+                    <div class="field-group">
+                        <label>Color 4</label>
+                        <input type="color" name="customize.color.3" style="height: 42px; padding: 2px; width: 100%;">
+                    </div>
+                    <div class="field-group">
+                        <label>Color 5</label>
+                        <input type="color" name="customize.color.4" style="height: 42px; padding: 2px; width: 100%;">
+                    </div>
+                </div>
+
+                <h4
+                    style="margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    Hair</h4>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Hair Name</label>
+                        <input type="text" name="customize.hair.name" placeholder="Pony Tail">
+                    </div>
+                    <div class="field-group">
+                        <label>Hair Color</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="color" name="customize.hair.color"
+                                style="height: 42px; padding: 2px; flex: 0 0 50px;">
+                            <input type="text" id="hair-color-text" readonly style="flex: 1;" placeholder="#555555">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+
+    </main>
+
+    <!-- Delete Modal -->
+    <div id="modal-overlay" class="hidden">
+        <div class="modal-content">
+            <h3 style="color: var(--danger);">Delete Confirmation</h3>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">This action cannot be undone.</p>
+            <p style="margin-bottom: 0.5rem;">Type <strong>BOTNOI</strong> to confirm.</p>
+            <input type="text" id="delete-confirm-input" placeholder="Type BOTNOI"
+                style="width: 100%; text-align: center; font-weight: bold; margin-bottom: 1rem;">
+            <div class="modal-actions">
+                <button class="btn" style="background: var(--bg-input);" onclick="closeModal()">Cancel</button>
+                <button class="btn danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const API_DH = 'https://dhconfig-zb2xurnl2a-as.a.run.app/dhConfig';
+        const API_A2F = 'https://dha2fconfig-zb2xurnl2a-as.a.run.app/dhA2fConfig';
+        const API_CUSTOMIZE = 'https://dhcustomize-zb2xurnl2a-as.a.run.app/dhCustomize';
+
+        let currentMode = 'dh'; // 'dh' or 'a2f'
+        let currentConfigId = null;
+        let isCreating = false;
+
+        // --- definitions for A2F ---
+        const A2F_PARAMS = [
+            { id: 'blink_strength', label: 'Blink Strength', type: 'slider', min: 0, max: 2, step: 0.1, def: 1 },
+            { id: 'eyelid_open_offset', label: 'Eyelid Open Offset', type: 'slider', min: -1, max: 1, step: 0.1, def: 0 },
+            { id: 'face_mask_level', label: 'Face Mask Level', type: 'slider', min: 0, max: 1, step: 0.05, def: 0.6 },
+            { id: 'face_mask_softness', label: 'Face Mask Softness', type: 'slider', min: 0.001, max: 0.5, step: 0.001, def: 0.0085 },
+            { id: 'lip_open_offset', label: 'Lip Open Offset', type: 'slider', min: -0.2, max: 0.2, step: 0.01, def: 0 },
+            { id: 'lower_face_smoothing', label: 'Lower Face Smoothing', type: 'slider', min: 0, max: 0.1, step: 0.001, def: 0.006 },
+            { id: 'lower_face_strength', label: 'Lower Face Strength', type: 'slider', min: 0, max: 2, step: 0.1, def: 1 },
+            { id: 'tongue_depth_offset', label: 'Tongue Depth Offset', type: 'slider', min: -3, max: 3, step: 0.1, def: 0 },
+            { id: 'tongue_height_offset', label: 'Tongue Height Offset', type: 'slider', min: -3, max: 3, step: 0.1, def: 0 },
+            { id: 'tongue_strength', label: 'Tongue Strength', type: 'slider', min: 0, max: 3, step: 0.1, def: 1.3 },
+            { id: 'upper_face_smoothing', label: 'Upper Face Smoothing', type: 'slider', min: 0, max: 0.1, step: 0.001, def: 0.001 },
+            { id: 'upper_face_strength', label: 'Upper Face Strength', type: 'slider', min: 0, max: 2, step: 0.1, def: 1 },
+            { id: 'skin_strength', label: 'Skin Strength', type: 'slider', min: 0, max: 2, step: 0.1, def: 1 }
+        ];
+
+        const A2F_EMOTIONS_GENERAL = [
+            { id: 'detected_emotion_contrast', label: 'Contrast', min: 0.3, max: 3, step: 0.1, def: 1 },
+            { id: 'detected_emotion_smoothing', label: 'Smoothing', min: 0, max: 1, step: 0.05, def: 0.7 },
+            { id: 'max_detected_emotions', label: 'Max Detected', min: 1, max: 6, step: 1, def: 3 },
+            { id: 'emotion_override_strength', label: 'Override Strength', min: 0, max: 1, step: 0.1, def: 0.5 },
+            { id: 'overall_emotion_strength', label: 'Overall Strength', min: 0, max: 1, step: 0.1, def: 0.6 }
+        ];
+
+        const A2F_EMOTION_TYPES = [
+            "amazement", "anger", "cheekiness", "disgust", "fear", "grief", "joy", "outofbreath", "pain", "sadness"
+        ];
+
+
+        // Initialize
+        initA2FBuilder();
+        initElevenLabsForDH();
+
+        function initA2FBuilder() {
+            // Params
+            const paramContainer = document.getElementById('a2f-parameters-container');
+            A2F_PARAMS.forEach(p => {
+                const el = createSlider(p.label, `a2f.params.${p.id}`, p.min, p.max, p.step, p.def);
+                paramContainer.appendChild(el);
+            });
+
+            // General Emotions
+            const emoHeader = document.getElementById('a2f-emotions-header-container');
+            A2F_EMOTIONS_GENERAL.forEach(p => {
+                const el = createSlider(p.label, `a2f.emo.${p.id}`, p.min, p.max, p.step, p.def);
+                emoHeader.appendChild(el);
+            });
+
+            // Overrides
+            const overridesContainer = document.getElementById('a2f-emotions-overrides-container');
+            A2F_EMOTION_TYPES.forEach(emo => {
+                overridesContainer.appendChild(createEmotionOverrideRow(emo));
+            });
+        }
+
+        function createSlider(labelTxt, name, min, max, step, def) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'field-group';
+
+            const labelRow = document.createElement('div');
+            labelRow.style.display = 'flex';
+            labelRow.style.justifyContent = 'space-between';
+            labelRow.innerHTML = `<label>${labelTxt}</label> <span class="range-value" id="val-${name}"></span>`;
+
+            const rangeContainer = document.createElement('div');
+            rangeContainer.className = 'range-container';
+            rangeContainer.innerHTML = `
+                <input type="range" class="range-slider" name="${name}" min="${min}" max="${max}" step="${step}" 
+                value="${def}" oninput="document.getElementById('val-${name}').innerText = this.value">
+            `;
+
+            wrapper.appendChild(labelRow);
+            wrapper.appendChild(rangeContainer);
+
+            // Set init
+            setTimeout(() => {
+                const input = rangeContainer.querySelector('input');
+                document.getElementById(`val-${name}`).innerText = input.value;
+            }, 0);
+
+            return wrapper;
+        }
+
+        function createEmotionOverrideRow(emo) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'field-group';
+            wrapper.style.border = '1px solid var(--border)';
+            wrapper.style.padding = '0.5rem';
+            wrapper.style.borderRadius = 'var(--radius)';
+
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.marginBottom = '0.5rem';
+            header.innerHTML = `
+                <span style="text-transform: capitalize; font-weight:600;">${emo}</span>
+                <label class="toggle-switch" style="transform: scale(0.8);">
+                    <input type="checkbox" name="a2f.emo.override.${emo}.enabled">
+                    <span class="slider"></span>
+                </label>
+            `;
+
+            const slider = createSlider('Strength', `a2f.emo.override.${emo}.strength`, 0, 1, 0.05, 0);
+
+            wrapper.appendChild(header);
+            wrapper.appendChild(slider);
+            return wrapper;
+        }
+
+        function initElevenLabsForDH() {
+            const ELEVENLABS_VOICES = [
+                { name: "Roger", id: "CwhRBWXzGAHq8TQ4Fs17" },
+                { name: "Sarah", id: "EXAVITQu4vr4xnSDxMaL" },
+                { name: "Laura", id: "FGY2WhTYpPnrIDTdsKH5" },
+                { name: "Charlie", id: "IKne3meq5aSn9XLyUdCD" },
+                { name: "George", id: "JBFqnCBsd6RMkjVDRZzb" },
+                { name: "Calium", id: "N2lVS1w4EtoT3dr4eOWO" },
+                { name: "River", id: "SAz9YHcvj6GT2YYXdXww" },
+                { name: "Harry", id: "SOYHLrjzK2X1ezoPC6cr" },
+                { name: "Liam", id: "TX3LPaxmHKxFdv7VOQHJ" },
+                { name: "Alice", id: "Xb7hH8MSUJpSbSDYk0k2" },
+                { name: "Matilda", id: "XrExE9yKIg1WjnnlVkGX" },
+                { name: "Will", id: "bIHbv24MWmeRgasZH58o" },
+                { name: "Jessica", id: "cgSgspJ2msm6clMCkdW9" },
+                { name: "Eric", id: "cjVigY5qzO86Huf0OWal" },
+                { name: "Chris", id: "iP95p4xoKVk53GoZ742B" },
+                { name: "Brian", id: "nPczCjzI2devNBz1zQrb" },
+                { name: "Daniel", id: "onwK4e9ZLuTAKqWW03F9" },
+                { name: "Lily", id: "pFZP5JQG7iQjIQuC4Bku" },
+                { name: "Adam", id: "pNInz6obpgDQGcFmaJgB" },
+                { name: "Bill", id: "pqHfZKP75CvOlQylNhV4" }
+            ];
+
+            const elSelect = document.getElementById('field-speakerid-elevenlabs');
+            ELEVENLABS_VOICES.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.id;
+                opt.innerText = v.name;
+                elSelect.appendChild(opt);
+            });
+
+            document.querySelector('select[name="ttsprovider"]').addEventListener('change', updateSpeakerInputType);
+        }
+
+        // --- Core Logic ---
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('mode-dh').classList.toggle('active', mode === 'dh');
+            document.getElementById('mode-a2f').classList.toggle('active', mode === 'a2f');
+            document.getElementById('mode-customize').classList.toggle('active', mode === 'customize');
+
+            // Clear list and main
+            document.getElementById('config-list').innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">Reload to see ${mode.toUpperCase()} configs.</div>`;
+            document.getElementById('main-editor').classList.add('hidden');
+
+            // Auto fetch if we have token
+            if (document.getElementById('auth-token').value) {
+                fetchConfigs();
+            }
+        }
+
+        function getAuthToken() {
+            return document.getElementById('auth-token').value;
+        }
+
+        function getApiUrl() {
+            if (currentMode === 'a2f') return API_A2F;
+            if (currentMode === 'customize') return API_CUSTOMIZE;
+            return API_DH;
+        }
+
+        async function fetchConfigs() {
+            const token = getAuthToken();
+            if (!token) return alert("Please enter auth token");
+
+            const url = getApiUrl();
+            try {
+                const res = await fetch(`${url}?config_id=listall`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                // Handle different error messages or structures if needed
+                if (!res.ok) throw new Error((await res.json()).error || res.statusText);
+
+                const data = await res.json();
+                renderList(data.configs);
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        function renderList(configs) {
+            const list = document.getElementById('config-list');
+            list.innerHTML = '';
+            if (!configs || configs.length === 0) {
+                list.innerHTML = `<div style="padding:1rem; text-align:center; color:var(--text-muted);">No configs found.</div>`;
+                return;
+            }
+            configs.forEach(id => {
+                const div = document.createElement('div');
+                div.className = 'config-item';
+                div.innerText = id;
+                div.onclick = () => loadConfig(id);
+                list.appendChild(div);
+            });
+        }
+
+        async function loadConfig(id) {
+            const token = getAuthToken();
+            const url = getApiUrl();
+            try {
+                const res = await fetch(`${url}?config_id=${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed to load config');
+
+                const data = await res.json();
+                isCreating = false;
+                currentConfigId = id;
+
+                if (currentMode === 'dh') renderDHForm(data);
+                else if (currentMode === 'a2f') renderA2FForm(data);
+                else renderCustomizeForm(data);
+
+                // Highlight active
+                document.querySelectorAll('.config-item').forEach(el => el.classList.remove('active'));
+                const activeItem = Array.from(document.querySelectorAll('.config-item')).find(el => el.innerText === id);
+                if (activeItem) activeItem.classList.add('active');
+
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        function startNewConfig() {
+            isCreating = true;
+            currentConfigId = null;
+            document.getElementById('main-editor').classList.remove('hidden');
+            document.getElementById('editor-title').innerText = `Create New ${currentMode.toUpperCase()}`;
+
+            // Clear selection
+            document.querySelectorAll('.config-item').forEach(el => el.classList.remove('active'));
+
+            if (currentMode === 'dh') {
+                document.getElementById('dh-config-form').classList.remove('hidden');
+                document.getElementById('a2f-config-form').classList.add('hidden');
+                document.getElementById('dh-config-form').reset();
+
+                const idField = document.getElementById('dh-config_id');
+                idField.readOnly = false;
+                idField.focus();
+
+                // Reset toggles & specialized logic
+                setToggle('sheet', false);
+                setToggle('idle', false);
+                setToggle('tts', false);
+                updateSpeakerInputType();
+                renderSentencesList([]);
+
+            } else if (currentMode === 'a2f') {
+                document.getElementById('dh-config-form').classList.add('hidden');
+                document.getElementById('a2f-config-form').classList.remove('hidden');
+                document.getElementById('customize-config-form').classList.add('hidden');
+                document.getElementById('a2f-config-form').reset();
+
+                const idField = document.getElementById('a2f-config_id');
+                idField.readOnly = false;
+                idField.focus();
+
+                // Trigger input events to update sliders
+                document.querySelectorAll('#a2f-config-form input[type="range"]').forEach(el => {
+                    // Reset to default
+                    el.value = el.getAttribute('value'); // Gets the default "value" attribute
+                    el.dispatchEvent(new Event('input'));
+                });
+                // Reset checkboxes
+                document.querySelectorAll('#a2f-config-form input[type="checkbox"]').forEach(el => el.checked = false);
+            } else {
+                // Customize
+                document.getElementById('dh-config-form').classList.add('hidden');
+                document.getElementById('a2f-config-form').classList.add('hidden');
+                document.getElementById('customize-config-form').classList.remove('hidden');
+                document.getElementById('customize-config-form').reset();
+
+                const idField = document.getElementById('customize-config_id');
+                idField.readOnly = false;
+                idField.focus();
+
+                // Reset defaults
+                const form = document.getElementById('customize-config-form');
+                form.querySelector('[name="customize.model"]').value = '';
+                form.querySelector('[name="customize.clothes"]').value = '';
+
+                ['hat', 'face', 'earring'].forEach(k => form.querySelector(`[name="customize.acc.${k}"]`).value = 0);
+
+                for (let i = 0; i < 5; i++) form.querySelector(`[name="customize.color.${i}"]`).value = '#000000';
+
+                form.querySelector('[name="customize.hair.name"]').value = '';
+                form.querySelector('[name="customize.hair.color"]').value = '#555555';
+                document.getElementById('hair-color-text').value = '#555555';
+            }
+        }
+
+        function renderDHForm(data) {
+            document.getElementById('main-editor').classList.remove('hidden');
+            document.getElementById('editor-title').innerText = "Edit Config: " + data.config_id;
+
+            document.getElementById('dh-config-form').classList.remove('hidden');
+            document.getElementById('a2f-config-form').classList.add('hidden');
+            document.getElementById('customize-config-form').classList.add('hidden');
+
+            const form = document.getElementById('dh-config-form');
+            form.reset();
+
+            // ID
+            document.getElementById('dh-config_id').value = data.config_id || '';
+            document.getElementById('dh-config_id').readOnly = true;
+
+            // Flat Fields
+            const flatFields = [
+                'botid', 'destinationflow', 'projectname', 'userid', 'speakerlanguage',
+                'speakerid', 'asrlanguage', 'asrprovider', 'ttsprovider',
+                'asrvadfalsetimeout', 'asrtimeout', 'micactivedelay', 'sessiontimeout',
+                'asrvadtrueblock', 'asrvadfalseblock', 'isanim', 'psaudio',
+                'a2f_config', 'customize'
+            ];
+
+            flatFields.forEach(key => {
+                const el = form.elements[key];
+                if (el && data[key] !== undefined) {
+                    if (typeof data[key] === 'object' && data[key] !== null && data[key].config_id) {
+                        el.value = data[key].config_id;
+                    } else {
+                        el.value = data[key];
+                    }
+                }
+            });
+
+            // Speaker Logic
+            if (data.ttsprovider === 'elevenlabs' && data.speakerid) {
+                document.getElementById('field-speakerid-elevenlabs').value = data.speakerid;
+            }
+            updateSpeakerInputType();
+
+            // Sheet
+            setToggle('sheet', !!data.sheet);
+            if (data.sheet) {
+                Object.keys(data.sheet).forEach(k => {
+                    const input = form.elements[`sheet.${k}`];
+                    if (input) input.value = data.sheet[k];
+                });
+            }
+
+            // Idle
+            setToggle('idle', !!data.idle_config);
+            if (data.idle_config) {
+                ['enabled', 'random', 'min_interval', 'max_interval'].forEach(k => {
+                    const input = form.elements[`idle_config.${k}`];
+                    if (input && data.idle_config[k] !== undefined) input.value = data.idle_config[k];
+                });
+                renderSentencesList(data.idle_config.sentences || []);
+            } else {
+                renderSentencesList([]);
+            }
+
+            // TTS Inject
+            setToggle('tts', !!data.tts_inject_config);
+            if (data.tts_inject_config) {
+                Object.keys(data.tts_inject_config).forEach(k => {
+                    const input = form.elements[`tts_inject_config.${k}`];
+                    if (input) input.value = data.tts_inject_config[k];
+                });
+            }
+        }
+
+        function renderA2FForm(data) {
+            document.getElementById('main-editor').classList.remove('hidden');
+            document.getElementById('editor-title').innerText = "Edit Config: " + data.config_id;
+
+            document.getElementById('dh-config-form').classList.add('hidden');
+            document.getElementById('a2f-config-form').classList.remove('hidden');
+            document.getElementById('customize-config-form').classList.add('hidden');
+
+            const form = document.getElementById('a2f-config-form');
+            form.reset();
+
+            document.getElementById('a2f-config_id').value = data.config_id || '';
+            document.getElementById('a2f-config_id').readOnly = true;
+
+            // Mapping JSON deeply to inputs
+            // We use name="a2f.params.blink_strength" convention.
+            // data structure: parameters: { blink_strength: ... }
+
+            if (data.parameters) {
+                Object.keys(data.parameters).forEach(k => {
+                    const input = form.querySelector(`[name="a2f.params.${k}"]`);
+                    if (input) {
+                        input.value = data.parameters[k];
+                        input.dispatchEvent(new Event('input'));
+                    }
+                });
+            }
+
+            if (data.emotions) {
+                // General
+                ['detected_emotion_contrast', 'detected_emotion_smoothing', 'max_detected_emotions', 'overall_emotion_strength', 'emotion_override_strength'].forEach(k => {
+                    const input = form.querySelector(`[name="a2f.emo.${k}"]`);
+                    if (input) {
+                        input.value = data.emotions[k];
+                        input.dispatchEvent(new Event('input'));
+                    }
+                });
+
+                // Overrides
+                if (data.emotions.emotion_overrides) {
+                    Object.keys(data.emotions.emotion_overrides).forEach(emo => {
+                        const obj = data.emotions.emotion_overrides[emo];
+                        const chk = form.querySelector(`[name="a2f.emo.override.${emo}.enabled"]`);
+                        const slider = form.querySelector(`[name="a2f.emo.override.${emo}.strength"]`);
+
+                        if (chk && obj.enabled !== undefined) chk.checked = obj.enabled;
+                        if (slider && obj.strength !== undefined) {
+                            slider.value = obj.strength;
+                            slider.dispatchEvent(new Event('input'));
+                        }
+                    });
+                }
+            }
+        }
+
+        function renderCustomizeForm(data) {
+            document.getElementById('main-editor').classList.remove('hidden');
+            document.getElementById('editor-title').innerText = "Edit Config: " + data.config_id;
+
+            document.getElementById('dh-config-form').classList.add('hidden');
+            document.getElementById('a2f-config-form').classList.add('hidden');
+            document.getElementById('customize-config-form').classList.remove('hidden');
+
+            const form = document.getElementById('customize-config-form');
+            form.reset();
+
+            // Set Hair Color Listener to update text
+            const hairColorPicker = form.querySelector('[name="customize.hair.color"]');
+            hairColorPicker.oninput = (e) => document.getElementById('hair-color-text').value = e.target.value;
+
+
+            document.getElementById('customize-config_id').value = data.config_id || '';
+            document.getElementById('customize-config_id').readOnly = true;
+
+            // Map data to fields
+            if (data.model) form.querySelector('[name="customize.model"]').value = data.model;
+            if (data.clothes) form.querySelector('[name="customize.clothes"]').value = data.clothes;
+
+            if (data.accessories) {
+                ['hat', 'face', 'earring'].forEach(k => {
+                    const el = form.querySelector(`[name="customize.acc.${k}"]`);
+                    if (el && data.accessories[k] !== undefined) el.value = data.accessories[k];
+                });
+            }
+
+            if (Array.isArray(data.color)) {
+                data.color.forEach((c, i) => {
+                    const el = form.querySelector(`[name="customize.color.${i}"]`);
+                    if (el) el.value = c;
+                });
+            }
+
+            if (data.hair) {
+                if (data.hair.name) form.querySelector('[name="customize.hair.name"]').value = data.hair.name;
+                if (data.hair.color) {
+                    form.querySelector('[name="customize.hair.color"]').value = data.hair.color;
+                    document.getElementById('hair-color-text').value = data.hair.color;
+                }
+            }
+        }
+
+        // --- Helpers ---
+        function updateSpeakerInputType() {
+            const provider = document.querySelector('select[name="ttsprovider"]').value;
+            const textInput = document.getElementById('field-speakerid-text');
+            const selectInput = document.getElementById('field-speakerid-elevenlabs');
+
+            if (provider === 'elevenlabs') {
+                textInput.classList.add('hidden');
+                selectInput.classList.remove('hidden');
+                if (Array.from(selectInput.options).some(o => o.value === textInput.value)) {
+                    selectInput.value = textInput.value;
+                }
+            } else {
+                textInput.classList.remove('hidden');
+                selectInput.classList.add('hidden');
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = type + ' show';
+            setTimeout(() => t.className = '', 3000);
+        }
+
+        function addSentenceRow(value = '') {
+            const list = document.getElementById('sentences-list');
+            const div = document.createElement('div');
+            div.className = 'sentence-row';
+            div.innerHTML = `
+                <input type="text" class="sentence-input" value="${value.replace(/"/g, '&quot;')}" placeholder="Type a sentence...">
+                <button type="button" class="btn-icon danger" onclick="this.parentElement.remove()" title="Remove">
+                    &times;
+                </button>
+            `;
+            list.appendChild(div);
+        }
+
+        function renderSentencesList(sentences) {
+            const list = document.getElementById('sentences-list');
+            list.innerHTML = '';
+            if (Array.isArray(sentences)) {
+                sentences.forEach(s => addSentenceRow(s));
+            }
+        }
+
+        function toggleSection(name) {
+            const isActive = document.getElementById(`toggle-${name}`).checked;
+            const section = document.getElementById(`section-${name}`);
+            if (isActive) section.classList.remove('hidden');
+            else section.classList.add('hidden');
+        }
+
+        function setToggle(name, active) {
+            document.getElementById(`toggle-${name}`).checked = active;
+            toggleSection(name);
+        }
+
+        // --- CRUD Actions ---
+
+        async function deleteCurrentConfig() {
+            document.getElementById('modal-overlay').classList.remove('hidden');
+            const input = document.getElementById('delete-confirm-input');
+            input.value = '';
+            input.focus();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        async function confirmDelete() {
+            const input = document.getElementById('delete-confirm-input');
+            if (input.value !== 'BOTNOI') {
+                showToast("Incorrect confirmation text", "error");
+                return;
+            }
+            closeModal();
+
+            const token = getAuthToken();
+            const url = getApiUrl();
+            let configId;
+            if (currentMode === 'dh') configId = document.getElementById('dh-config_id').value;
+            else if (currentMode === 'a2f') configId = document.getElementById('a2f-config_id').value;
+            else configId = document.getElementById('customize-config_id').value;
+
+            try {
+                const res = await fetch(`${url}?config_id=${configId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Delete failed');
+
+                showToast('Deleted successfully');
+                fetchConfigs();
+                document.getElementById('main-editor').classList.add('hidden');
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        async function saveConfig() {
+            const token = getAuthToken();
+            const url = getApiUrl();
+
+            let payload = {};
+
+            if (currentMode === 'dh') {
+                payload = getDHFormData();
+                if (!payload) return; // validation failed
+            } else if (currentMode === 'a2f') {
+                payload = getA2FFormData();
+                if (!payload) return;
+            } else {
+                payload = getCustomizeFormData();
+                if (!payload) return;
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+
+                showToast('Saved successfully');
+                if (isCreating) {
+                    await fetchConfigs();
+                    loadConfig(payload.config_id);
+                }
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        function getDHFormData() {
+            const form = document.getElementById('dh-config-form');
+            const configId = document.getElementById('dh-config_id').value.trim();
+            if (!configId) { showToast("Config ID is required", "error"); return null; }
+
+            const payload = { config_id: configId };
+
+            const getVal = (key, type) => {
+                const el = form.elements[key];
+                if (!el) return undefined;
+                let val = el.value;
+                if (!val && el.placeholder) val = el.placeholder;
+                if (type === 'bool') return val === 'true';
+                if (type === 'number') return Number(val);
+                return val;
+            };
+
+            // Main fields
+            ['botid', 'destinationflow', 'projectname', 'userid', 'speakerlanguage',
+                'asrlanguage', 'asrprovider', 'ttsprovider', 'a2f_config', 'customize'].forEach(k => payload[k] = getVal(k));
+
+            if (payload.ttsprovider === 'elevenlabs') {
+                payload.speakerid = document.getElementById('field-speakerid-elevenlabs').value;
+            } else {
+                payload.speakerid = getVal('speakerid');
+            }
+
+            ['asrvadfalsetimeout', 'asrtimeout', 'micactivedelay', 'sessiontimeout',
+                'asrvadtrueblock', 'asrvadfalseblock'].forEach(k => payload[k] = getVal(k, 'number'));
+
+            ['isanim', 'psaudio'].forEach(k => payload[k] = getVal(k, 'bool'));
+
+            if (!payload.botid) { showToast("Bot ID is required", "error"); return null; }
+            if (!payload.destinationflow) { showToast("Destination Flow is required", "error"); return null; }
+
+            // Sheet
+            if (document.getElementById('toggle-sheet').checked) {
+                payload.sheet = {
+                    spreadsheet_id: getVal('sheet.spreadsheet_id'),
+                    range_name: getVal('sheet.range_name'),
+                    poll_interval_seconds: getVal('sheet.poll_interval_seconds', 'number'),
+                    prefix: getVal('sheet.prefix'),
+                    item: getVal('sheet.item'),
+                    joiner: getVal('sheet.joiner'),
+                    last_joiner: getVal('sheet.last_joiner'),
+                    suffix: getVal('sheet.suffix'),
+                    enabled: getVal('sheet.enabled', 'bool')
+                };
+            }
+
+            // Idle
+            if (document.getElementById('toggle-idle').checked) {
+                const sentenceInputs = document.querySelectorAll('#sentences-list .sentence-input');
+                const sentences = Array.from(sentenceInputs).map(i => i.value.trim()).filter(s => s.length > 0);
+
+                payload.idle_config = {
+                    enabled: getVal('idle_config.enabled', 'bool'),
+                    random: getVal('idle_config.random', 'bool'),
+                    min_interval: getVal('idle_config.min_interval', 'number'),
+                    max_interval: getVal('idle_config.max_interval', 'number'),
+                    sentences: sentences
+                };
+            }
+
+            // TTS Inject
+            const useTTS = document.getElementById('toggle-tts').checked;
+            if ((payload.sheet || payload.idle_config) && !useTTS) {
+                showToast("TTS Inject Config is required for Sheet/Idle.", "error"); return null;
+            }
+            if (useTTS) {
+                payload.tts_inject_config = {
+                    auth_token: getVal('tts_inject_config.auth_token'),
+                    callback_url: getVal('tts_inject_config.callback_url'),
+                    provider: getVal('tts_inject_config.provider'),
+                    speaker: getVal('tts_inject_config.speaker')
+                };
+            }
+
+            return payload;
+        }
+
+        function getA2FFormData() {
+            const form = document.getElementById('a2f-config-form');
+            const configId = document.getElementById('a2f-config_id').value.trim();
+            if (!configId) { showToast("Config ID is required", "error"); return null; }
+
+            const payload = {
+                config_id: configId,
+                parameters: {},
+                emotions: { emotion_overrides: {} }
+            };
+
+            // Params
+            A2F_PARAMS.forEach(p => {
+                const el = form.querySelector(`[name="a2f.params.${p.id}"]`);
+                payload.parameters[p.id] = parseFloat(el.value);
+            });
+
+            // Emotions General
+            A2F_EMOTIONS_GENERAL.forEach(p => {
+                const el = form.querySelector(`[name="a2f.emo.${p.id}"]`);
+                payload.emotions[p.id] = parseFloat(el.value);
+            });
+
+            // Emotions Override
+            A2F_EMOTION_TYPES.forEach(emo => {
+                const chk = form.querySelector(`[name="a2f.emo.override.${emo}.enabled"]`);
+                const val = form.querySelector(`[name="a2f.emo.override.${emo}.strength"]`);
+                payload.emotions.emotion_overrides[emo] = {
+                    enabled: chk.checked,
+                    strength: parseFloat(val.value)
+                };
+            });
+
+            return payload;
+        }
+
+        function getCustomizeFormData() {
+            const configId = document.getElementById('customize-config_id').value.trim();
+            if (!configId) { showToast("Config ID is required", "error"); return null; }
+
+            const form = document.getElementById('customize-config-form');
+
+            const payload = {
+                config_id: configId,
+                model: form.querySelector('[name="customize.model"]').value || "Charmi",
+                clothes: form.querySelector('[name="customize.clothes"]').value || "Suit",
+                accessories: {
+                    hat: Number(form.querySelector('[name="customize.acc.hat"]').value) || 0,
+                    face: Number(form.querySelector('[name="customize.acc.face"]').value) || 0,
+                    earring: Number(form.querySelector('[name="customize.acc.earring"]').value) || 0
+                },
+                color: [],
+                hair: {
+                    name: form.querySelector('[name="customize.hair.name"]').value || "Pony Tail",
+                    color: form.querySelector('[name="customize.hair.color"]').value || "#555555"
+                }
+            };
+
+            for (let i = 0; i < 5; i++) {
+                payload.color.push(form.querySelector(`[name="customize.color.${i}"]`).value || "#000000");
+            }
+
+            return payload;
+        }
+
+    </script>
+
+</body>
+
+</html>
