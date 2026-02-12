@@ -96,7 +96,7 @@ export const DHConfig = ({
                                 A2F Config (Ref)
                             </label>
                             <select
-                                value={currentData.a2f_config || ''}
+                                value={(typeof currentData.a2f_config === 'object' && currentData.a2f_config?.config_id) ? currentData.a2f_config.config_id : currentData.a2f_config || ''}
                                 onChange={(e) => updateField('a2f_config', e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg"
                                 style={{
@@ -118,7 +118,7 @@ export const DHConfig = ({
                                 Customize (Ref)
                             </label>
                             <select
-                                value={currentData.customize || ''}
+                                value={(typeof currentData.customize === 'object' && currentData.customize?.config_id) ? currentData.customize.config_id : currentData.customize || ''}
                                 onChange={(e) => updateField('customize', e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg"
                                 style={{
