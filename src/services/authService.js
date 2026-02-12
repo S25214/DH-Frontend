@@ -11,6 +11,9 @@ import { auth } from './firebase';
 const BOTNOI_TOKEN_KEY = 'botnoi_token';
 const TOKEN_EXCHANGE_URL = 'https://api-voice.botnoi.ai/api/dashboard/firebase_auth';
 
+// Use localStorage instead of sessionStorage for persistent login
+const storage = localStorage;
+
 /**
  * Sign in with Google
  */
@@ -106,8 +109,8 @@ export const exchangeTokenForBotnoi = async (user) => {
             throw new Error('No token received from Botnoi API');
         }
 
-        // Store Botnoi token in sessionStorage
-        sessionStorage.setItem(BOTNOI_TOKEN_KEY, token);
+        // Store Botnoi token in localStorage for persistence
+        storage.setItem(BOTNOI_TOKEN_KEY, token);
 
         return token;
     } catch (error) {
@@ -120,14 +123,14 @@ export const exchangeTokenForBotnoi = async (user) => {
  * Get the current Botnoi token from storage
  */
 export const getBotnoiToken = () => {
-    return sessionStorage.getItem(BOTNOI_TOKEN_KEY);
+    return storage.getItem(BOTNOI_TOKEN_KEY);
 };
 
 /**
  * Clear all tokens from storage
  */
 export const clearTokens = () => {
-    sessionStorage.removeItem(BOTNOI_TOKEN_KEY);
+    storage.removeItem(BOTNOI_TOKEN_KEY);
 };
 
 /**

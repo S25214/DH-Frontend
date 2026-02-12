@@ -1,37 +1,62 @@
-# Quick Fix for GitHub Pages Deployment
+# GitHub Pages Deployment Troubleshooting
 
-## Issue
-Getting `NS_ERROR_CORRUPTED_CONTENT` on GitHub Pages - trying to load source files instead of built files.
+## Current Issue
+Site is trying to load `/src/main.jsx` instead of built files.
 
-## Solution
+## Status Check
+✅ Local build works correctly
+✅ `.nojekyll` file created
+✅ Vite config updated to use relative paths
 
-1. **Added `.nojekyll` file** in `public/` folder
-   - Tells GitHub Pages not to process files with Jekyll
-   - Ensures all files (including those starting with `_`) are served correctly
+## What's Wrong
+The GitHub Actions build might be failing silently or not uploading the correct files.
 
-2. **Updated `vite.config.js`** to use `base: './'`
-   - Use relative paths for better compatibility with custom domains
+## Solution: Force Clean Build
 
-## Deploy the Fix
+1. **Check GitHub Actions Status**
+   - Go to your repo → **Actions** tab
+   - Look at the latest workflow run
+   - Check if there are any errors in the build step
+
+2. **Verify the Build Output**
+   - In the Actions run, expand the "Build" step
+   - Look for any errors or warnings
+   - Ensure `npm run build` completes successfully
+
+3. **Common Issues**
+
+   **A. Secrets Not Set Correctly**
+   - Go to Settings → Secrets → Actions
+   - Verify ALL 6 Firebase secrets are present
+   - Values should NOT have quotes around them
+
+   **B. Build Failing Due to Missing Env Vars**
+   - The build might fail if Firebase config is undefined
+   - Check the build logs for any Firebase initialization errors
+
+4. **Quick Fix: Manual Trigger**
+   ```bash
+   # Make a small change to force rebuild
+   git commit --allow-empty -m "trigger rebuild"
+   git push origin main
+   ```
+
+5. **Alternative: Check Deployed Files**
+   - After GitHub Actions completes
+   - Visit: `https://dh.didthat.cc/index.html` directly
+   - View page source - it should show built JS files, not `/src/main.jsx`
+
+## If Build Logs Show Errors
+
+The most common error is missing Firebase environment variables during build. The build step in GitHub Actions should show:
 
 ```bash
-git add .
-git commit -m "fix: add .nojekyll and update base path for GitHub Pages"
-git push origin main
+> dh-frontend@0.0.0 build
+✓ built in 2.69s
 ```
 
-Wait 1-2 minutes for GitHub Actions to rebuild, then:
-1. **Hard refresh** your browser (Ctrl+Shift+R or Cmd+Shift+R)
-2. Or try in **incognito mode**
+If you see errors related to Firebase or undefined, the secrets aren't being passed correctly.
 
-## If Still Not Working
+## Next Step
 
-Check GitHub Actions:
-1. Go to your repo → **Actions** tab
-2. Check if the build is completing successfully
-3. Look for any error messages in the build logs
-
-Also verify:
-- GitHub Pages is enabled (Settings → Pages)
-- Source is set to "GitHub Actions"
-- Your custom domain DNS is configured correctly
+Check your GitHub Actions logs and share any error messages you see!

@@ -4,9 +4,13 @@ import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';
 import ConnectPage from './pages/ConnectPage';
+import { useAuth } from './hooks/useAuth';
 import './index.css';
 
 function App() {
+  // Initialize auth state listener
+  useAuth();
+
   return (
     <Router>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-body)' }}>
