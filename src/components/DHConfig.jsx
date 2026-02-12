@@ -105,7 +105,7 @@ export const DHConfig = ({
                                     color: 'var(--text-main)',
                                 }}
                             >
-                                <option value="">Select Config...</option>
+                                <option value="">default</option>
                                 {a2fConfigs.map(id => (
                                     <option key={id} value={id}>{id}</option>
                                 ))}
@@ -126,7 +126,7 @@ export const DHConfig = ({
                                     color: 'var(--text-main)',
                                 }}
                             >
-                                <option value="">Select Config...</option>
+                                <option value="">default</option>
                                 {customizeConfigs.map(id => (
                                     <option key={id} value={id}>{id}</option>
                                 ))}
