@@ -16,6 +16,10 @@ export const Dashboard = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
+    // Config lists for dropdowns
+    const [a2fConfigs, setA2FConfigs] = useState([]);
+    const [customizeConfigs, setCustomizeConfigs] = useState([]);
+
     // Collapsible sections state
     const [expandedSections, setExpandedSections] = useState({
         core: true,
@@ -35,6 +39,17 @@ export const Dashboard = () => {
         try {
             const list = await fetchConfigs(configType);
             setConfigs(list);
+
+            // If in DH mode, fetch other config lists for dropdowns
+            if (configType === 'dh') {
+                const [a2fList, customizeList] = await Promise.all([
+                    fetchConfigs('a2f'),
+                    fetchConfigs('customize')
+                ]);
+                setA2FConfigs(a2fList);
+                setCustomizeConfigs(customizeList);
+            }
+
             setSelectedConfig(null);
             setCurrentData(null);
         } catch (error) {
@@ -99,14 +114,41 @@ export const Dashboard = () => {
             return;
         }
 
-        if (!currentData.botid || !currentData.destinationflow) {
-            showToast('Bot ID and Destination Flow are required', 'error');
-            return;
+        if (configType === 'dh') {
+            if (!currentData.botid || !currentData.destinationflow) {
+                showToast('Bot ID and Destination Flow are required', 'error');
+                return;
+            }
         }
 
         setLoading(true);
         try {
-            await saveConfig(configType, currentData);
+            let payload = currentData;
+
+            // STRICT FIELD WHITELISTING for DH Config
+            if (configType === 'dh') {
+                const allowedFields = [
+                    'config_id', 'botid', 'destinationflow', 'projectname', 'userid',
+                    'speakerlanguage', 'speakerid', 'asrlanguage', 'asrprovider', 'ttsprovider',
+                    'asrvadfalsetimeout', 'asrtimeout', 'micactivedelay', 'sessiontimeout',
+                    'asrvadtrueblock', 'asrvadfalseblock', 'isanim', 'psaudio',
+                    'a2f_config', 'customize'
+                ];
+
+                payload = {};
+                allowedFields.forEach(field => {
+                    if (currentData[field] !== undefined) {
+                        payload[field] = currentData[field];
+                    }
+                });
+
+                // Handle objects - Keep them if they exist in state, regardless of enabled status (Data Preservation)
+                if (currentData.sheet) payload.sheet = currentData.sheet;
+                if (currentData.idle_config) payload.idle_config = currentData.idle_config;
+                if (currentData.tts_inject_config) payload.tts_inject_config = currentData.tts_inject_config;
+            }
+
+            await saveConfig(configType, payload);
             showToast('Config saved successfully!', 'success');
             await loadConfigList();
             if (isCreating) {
@@ -162,66 +204,70 @@ export const Dashboard = () => {
     };
 
     const toggleSheetConfig = (enabled) => {
-        if (enabled) {
-            setCurrentData((prev) => ({
+        setCurrentData((prev) => {
+            if (!prev.sheet) {
+                return {
+                    ...prev,
+                    sheet: {
+                        spreadsheet_id: '',
+                        range_name: 'Bot!B:E',
+                        poll_interval_seconds: 10,
+                        prefix: '',
+                        item: '',
+                        joiner: ', ',
+                        last_joiner: '',
+                        suffix: '',
+                        enabled: true, // Use boolean for internal state
+                    },
+                };
+            }
+            return {
                 ...prev,
-                sheet: {
-                    spreadsheet_id: '',
-                    range_name: 'Bot!B:E',
-                    poll_interval_seconds: 10,
-                    prefix: '',
-                    item: '',
-                    joiner: ', ',
-                    last_joiner: '',
-                    suffix: '',
-                    enabled: 'true',
-                },
-            }));
-        } else {
-            setCurrentData((prev) => ({
-                ...prev,
-                sheet: null,
-            }));
-        }
+                sheet: { ...prev.sheet, enabled: enabled },
+            };
+        });
     };
 
     const toggleIdleConfig = (enabled) => {
-        if (enabled) {
-            setCurrentData((prev) => ({
+        setCurrentData((prev) => {
+            if (!prev.idle_config) {
+                return {
+                    ...prev,
+                    idle_config: {
+                        enabled: true,
+                        random: true,
+                        min_interval: 10,
+                        max_interval: 30,
+                        sentences: [],
+                    },
+                };
+            }
+            return {
                 ...prev,
-                idle_config: {
-                    enabled: 'true',
-                    random: 'true',
-                    min_interval: 10,
-                    max_interval: 30,
-                    sentences: [],
-                },
-            }));
-        } else {
-            setCurrentData((prev) => ({
-                ...prev,
-                idle_config: null,
-            }));
-        }
+                idle_config: { ...prev.idle_config, enabled: enabled },
+            };
+        });
     };
 
     const toggleTTSInjectConfig = (enabled) => {
-        if (enabled) {
-            setCurrentData((prev) => ({
+        setCurrentData((prev) => {
+            if (!prev.tts_inject_config) {
+                return {
+                    ...prev,
+                    tts_inject_config: {
+                        auth_token: '',
+                        callback_url: '',
+                        provider: 'botnoi',
+                        speaker: '523',
+                        enabled: true, // Add enabled field for data preservation
+                    },
+                };
+            }
+            return {
                 ...prev,
-                tts_inject_config: {
-                    auth_token: '',
-                    callback_url: '',
-                    provider: 'botnoi',
-                    speaker: '523',
-                },
-            }));
-        } else {
-            setCurrentData((prev) => ({
-                ...prev,
-                tts_inject_config: null,
-            }));
-        }
+                tts_inject_config: { ...prev.tts_inject_config, enabled: enabled },
+            };
+        });
     };
 
     const addIdleSentence = () => {
@@ -679,6 +725,8 @@ export const Dashboard = () => {
                             addIdleSentence={addIdleSentence}
                             updateIdleSentence={updateIdleSentence}
                             removeIdleSentence={removeIdleSentence}
+                            a2fConfigs={a2fConfigs}
+                            customizeConfigs={customizeConfigs}
                         />
                     </div>
                 )}

@@ -12,7 +12,10 @@ export const DHConfig = ({
     toggleTTSInjectConfig,
     addIdleSentence,
     updateIdleSentence,
-    removeIdleSentence
+    updateIdleSentence,
+    removeIdleSentence,
+    a2fConfigs = [],
+    customizeConfigs = []
 }) => {
     return (
         <>
@@ -93,36 +96,44 @@ export const DHConfig = ({
                             <label className="block text-sm font-medium text-text-muted mb-2">
                                 A2F Config (Ref)
                             </label>
-                            <input
-                                type="text"
+                            <select
                                 value={currentData.a2f_config || ''}
                                 onChange={(e) => updateField('a2f_config', e.target.value)}
-                                placeholder="default"
                                 className="w-full px-4 py-3 rounded-lg"
                                 style={{
                                     backgroundColor: 'var(--bg-input)',
                                     border: '1px solid var(--border)',
                                     color: 'var(--text-main)',
                                 }}
-                            />
+                            >
+                                <option value="">Select Config...</option>
+                                <option value="default">default (Manual)</option>
+                                {a2fConfigs.map(id => (
+                                    <option key={id} value={id}>{id}</option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-text-muted mb-2">
                                 Customize (Ref)
                             </label>
-                            <input
-                                type="text"
+                            <select
                                 value={currentData.customize || ''}
                                 onChange={(e) => updateField('customize', e.target.value)}
-                                placeholder="default_theme"
                                 className="w-full px-4 py-3 rounded-lg"
                                 style={{
                                     backgroundColor: 'var(--bg-input)',
                                     border: '1px solid var(--border)',
                                     color: 'var(--text-main)',
                                 }}
-                            />
+                            >
+                                <option value="">Select Config...</option>
+                                <option value="default">default (Manual)</option>
+                                {customizeConfigs.map(id => (
+                                    <option key={id} value={id}>{id}</option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
@@ -506,21 +517,21 @@ export const DHConfig = ({
                         <label className="flex items-center space-x-2 cursor-pointer">
                             <input
                                 type="checkbox"
-                                checked={!!currentData.sheet}
+                                checked={!!currentData.sheet?.enabled}
                                 onChange={(e) => toggleSheetConfig(e.target.checked)}
                                 className="w-5 h-5"
                             />
                             <span className="text-sm text-text-muted">Enable</span>
                         </label>
                     </div>
-                    {currentData.sheet && (
+                    {currentData.sheet && !!currentData.sheet.enabled && (
                         <button onClick={() => toggleSection('sheet')} className="text-text-main">
                             {expandedSections.sheet ? '▼' : '▶'}
                         </button>
                     )}
                 </div>
 
-                {currentData.sheet && expandedSections.sheet && (
+                {currentData.sheet && !!currentData.sheet.enabled && expandedSections.sheet && (
                     <div className="p-6 grid md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-text-muted mb-2">
@@ -682,21 +693,21 @@ export const DHConfig = ({
                         <label className="flex items-center space-x-2 cursor-pointer">
                             <input
                                 type="checkbox"
-                                checked={!!currentData.idle_config}
+                                checked={!!currentData.idle_config?.enabled}
                                 onChange={(e) => toggleIdleConfig(e.target.checked)}
                                 className="w-5 h-5"
                             />
                             <span className="text-sm text-text-muted">Enable</span>
                         </label>
                     </div>
-                    {currentData.idle_config && (
+                    {currentData.idle_config && !!currentData.idle_config.enabled && (
                         <button onClick={() => toggleSection('idle')} className="text-text-main">
                             {expandedSections.idle ? '▼' : '▶'}
                         </button>
                     )}
                 </div>
 
-                {currentData.idle_config && expandedSections.idle && (
+                {currentData.idle_config && !!currentData.idle_config.enabled && expandedSections.idle && (
                     <div className="p-6">
                         <div className="grid md:grid-cols-2 gap-6 mb-6">
                             <div>
@@ -829,7 +840,7 @@ export const DHConfig = ({
                         <label className="flex items-center space-x-2 cursor-pointer">
                             <input
                                 type="checkbox"
-                                checked={!!currentData.tts_inject_config}
+                                checked={!!currentData.tts_inject_config?.enabled}
                                 onChange={(e) => toggleTTSInjectConfig(e.target.checked)}
                                 className="w-5 h-5"
                             />
@@ -837,14 +848,14 @@ export const DHConfig = ({
                         </label>
                     </div>
                     <p className="text-xs text-text-muted">* Required if Sheet or Idle is enabled</p>
-                    {currentData.tts_inject_config && (
+                    {currentData.tts_inject_config && !!currentData.tts_inject_config.enabled && (
                         <button onClick={() => toggleSection('tts_inject')} className="text-text-main">
                             {expandedSections.tts_inject ? '▼' : '▶'}
                         </button>
                     )}
                 </div>
 
-                {currentData.tts_inject_config && expandedSections.tts_inject && (
+                {currentData.tts_inject_config && !!currentData.tts_inject_config.enabled && expandedSections.tts_inject && (
                     <div className="p-6 grid md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-text-muted mb-2">
