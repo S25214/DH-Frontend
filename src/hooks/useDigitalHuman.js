@@ -21,7 +21,7 @@ export const useDigitalHuman = (appId, options = {}) => {
                 const initOptions = {
                     autoUnmute: false,
                     showUI: true,
-                    lookAt: false,
+                    lookAt: true,
                     microphone: true,
                     ...options,
                 };
@@ -33,6 +33,7 @@ export const useDigitalHuman = (appId, options = {}) => {
                     console.warn('DigitalHuman: No container ref provided, falling back to default container.');
                 }
 
+                console.log('DigitalHuman: Initializing with options:', initOptions);
                 window.DigitalHuman.init(appId, initOptions);
                 isInitialized.current = true;
             } else {

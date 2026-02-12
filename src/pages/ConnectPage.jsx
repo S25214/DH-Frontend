@@ -77,7 +77,18 @@ export const ConnectPage = () => {
         setLoading(true);
         try {
             // Save changes to API
-            await saveConfig('dh', configData);
+            // Save changes to API (send only simplified fields)
+            const simplifiedConfig = {
+                config_id: configData.config_id,
+                botid: configData.botid,
+                destinationflow: configData.destinationflow,
+                asrprovider: configData.asrprovider,
+                asrlanguage: configData.asrlanguage,
+                ttsprovider: configData.ttsprovider,
+                speakerlanguage: configData.speakerlanguage,
+                speakerid: configData.speakerid,
+            };
+            await saveConfig('dh', simplifiedConfig);
 
             // Re-apply config ID to SDK to trigger update
             setConfigID(selectedConfig);
@@ -178,7 +189,7 @@ export const ConnectPage = () => {
 
                 {/* SDK Container - Full Screen when connected, or placeholder when not */}
                 <div
-                    className={`${isConnected ? 'w-full h-full' : 'rounded-xl border overflow-hidden'}`}
+                    className={`relative ${isConnected ? 'w-full h-full' : 'rounded-xl border overflow-hidden'}`}
                     style={{
                         backgroundColor: isConnected ? 'black' : 'var(--bg-panel)',
                         borderColor: 'var(--border)',
@@ -186,10 +197,22 @@ export const ConnectPage = () => {
                     }}
                 >
                     {/* The container ref div requires display:block to be measured by SDK init */}
-                    <div ref={containerRef} className="w-full h-full" style={{ display: isConnected ? 'block' : 'none' }} />
+                    {/* We use visibility:hidden and absolute positioning to keep it rendered but invisible when not connected */}
+                    <div
+                        ref={containerRef}
+                        className="w-full h-full"
+                        style={{
+                            display: 'block',
+                            visibility: isConnected ? 'visible' : 'hidden',
+                            position: isConnected ? 'relative' : 'absolute',
+                            top: 0,
+                            left: 0,
+                            zIndex: 10
+                        }}
+                    />
 
                     {!isConnected && (
-                        <div className="flex items-center justify-center h-[600px]">
+                        <div className="flex items-center justify-center h-[600px] relative z-0">
                             <div className="text-center">
                                 <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-bg-input flex items-center justify-center">
                                     <span className="text-5xl text-text-muted">🎭</span>
@@ -274,6 +297,11 @@ export const ConnectPage = () => {
                                             value={configData.asrprovider || 'elevenlabs'}
                                             onChange={(e) => updateConfigField('asrprovider', e.target.value)}
                                             className="w-full px-3 py-2 rounded-lg bg-bg-input border border-border text-text-main"
+                                            style={{
+                                                backgroundColor: 'var(--bg-input)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-main)',
+                                            }}
                                         >
                                             {ASR_PROVIDERS.map((provider) => (
                                                 <option key={provider.value} value={provider.value}>
@@ -312,6 +340,11 @@ export const ConnectPage = () => {
                                             value={configData.ttsprovider || 'botnoi'}
                                             onChange={(e) => updateConfigField('ttsprovider', e.target.value)}
                                             className="w-full px-3 py-2 rounded-lg bg-bg-input border border-border text-text-main"
+                                            style={{
+                                                backgroundColor: 'var(--bg-input)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-main)',
+                                            }}
                                         >
                                             {TTS_PROVIDERS.map((provider) => (
                                                 <option key={provider.value} value={provider.value}>
