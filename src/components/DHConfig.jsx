@@ -1,5 +1,7 @@
 
 
+import { ASR_PROVIDERS, TTS_PROVIDERS, ASR_LANGUAGES, TTS_LANGUAGES } from '../constants/dhConstants';
+
 export const DHConfig = ({
     currentData,
     isCreating,
@@ -260,8 +262,11 @@ export const DHConfig = ({
                                     color: 'var(--text-main)',
                                 }}
                             >
-                                <option value="elevenlabs">ElevenLabs</option>
-                                <option value="botnoi">Botnoi</option>
+                                {ASR_PROVIDERS.map((provider) => (
+                                    <option key={provider.value} value={provider.value}>
+                                        {provider.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -279,29 +284,11 @@ export const DHConfig = ({
                                     color: 'var(--text-main)',
                                 }}
                             >
-                                <option value="th-TH">Thai</option>
-                                <option value="en-US">English</option>
-                                <option value="fil-PH">Filipino</option>
-                                <option value="pt-BR">Portuguese</option>
-                                <option value="en-SG">Singapore</option>
-                                <option value="tr-TR">Turkish</option>
-                                <option value="lo-LA">Lao</option>
-                                <option value="zh-CN">Chinese</option>
-                                <option value="vi-VN">Vietnamese</option>
-                                <option value="id-ID">Indonesian</option>
-                                <option value="de-DE">German</option>
-                                <option value="fr-FR">French</option>
-                                <option value="ru-RU">Russian</option>
-                                <option value="my-MM">Burmese</option>
-                                <option value="km-KH">Cambodia</option>
-                                <option value="es-ES">Spanish</option>
-                                <option value="ms-MY">Malaysian</option>
-                                <option value="nl-NL">Dutch</option>
-                                <option value="ko-KR">Korean</option>
-                                <option value="hi-IN">Hindi</option>
-                                <option value="it-IT">Italian</option>
-                                <option value="ja-JP">Japanese</option>
-                                <option value="ar-SA">Arabic</option>
+                                {ASR_LANGUAGES.map((lang) => (
+                                    <option key={lang.value} value={lang.value}>
+                                        {lang.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -434,8 +421,11 @@ export const DHConfig = ({
                                     color: 'var(--text-main)',
                                 }}
                             >
-                                <option value="botnoi">Botnoi</option>
-                                <option value="elevenlabs">ElevenLabs</option>
+                                {TTS_PROVIDERS.map((provider) => (
+                                    <option key={provider.value} value={provider.value}>
+                                        {provider.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -453,29 +443,11 @@ export const DHConfig = ({
                                     color: 'var(--text-main)',
                                 }}
                             >
-                                <option value="th">Thai</option>
-                                <option value="en">English</option>
-                                <option value="fil">Filipino</option>
-                                <option value="pt">Portuguese</option>
-                                <option value="en-SG">Singapore</option>
-                                <option value="tr">Turkish</option>
-                                <option value="lo">Lao</option>
-                                <option value="zh">Chinese</option>
-                                <option value="vi">Vietnamese</option>
-                                <option value="id">Indonesian</option>
-                                <option value="de">German</option>
-                                <option value="fr">French</option>
-                                <option value="ru">Russian</option>
-                                <option value="my">Burmese</option>
-                                <option value="km">Cambodia</option>
-                                <option value="es">Spanish</option>
-                                <option value="ms">Malaysian</option>
-                                <option value="nl">Dutch</option>
-                                <option value="ko">Korean</option>
-                                <option value="hi">Hindi</option>
-                                <option value="it">Italian</option>
-                                <option value="ja">Japanese</option>
-                                <option value="ar">Arabic</option>
+                                {TTS_LANGUAGES.map((lang) => (
+                                    <option key={lang.value} value={lang.value}>
+                                        {lang.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

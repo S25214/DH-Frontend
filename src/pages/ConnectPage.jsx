@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import useDigitalHuman from '../hooks/useDigitalHuman';
 import { fetchConfigs, loadConfig, saveConfig } from '../services/apiService';
 import { useToast } from '../components/Toast';
+import { ASR_PROVIDERS, TTS_PROVIDERS, ASR_LANGUAGES, TTS_LANGUAGES } from '../constants/dhConstants';
 
 export const ConnectPage = () => {
     const { showToast, ToastContainer } = useToast();
@@ -101,7 +102,7 @@ export const ConnectPage = () => {
             <ToastContainer />
 
             {/* Main Content Area */}
-            <div className={`transition-all duration-300 ${isConnected ? 'fixed inset-0 z-0' : 'max-w-7xl mx-auto px-4 py-8'}`}>
+            <div className={`transition-all duration-300 ${isConnected ? 'fixed inset-0 z-50' : 'max-w-7xl mx-auto px-4 py-8'}`}>
 
                 {/* Header - Only visible when NOT connected */}
                 {!isConnected && (
@@ -206,7 +207,7 @@ export const ConnectPage = () => {
                     {/* Hamburger Button */}
                     <button
                         onClick={() => setIsMenuOpen(true)}
-                        className="fixed top-6 right-6 z-50 p-3 rounded-full shadow-lg hover:bg-opacity-90 transition-all"
+                        className="fixed top-6 right-6 z-[60] p-3 rounded-full shadow-lg hover:bg-opacity-90 transition-all"
                         style={{ backgroundColor: 'var(--bg-panel)', color: 'var(--text-main)' }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -214,17 +215,11 @@ export const ConnectPage = () => {
                         </svg>
                     </button>
 
-                    {/* Drawer Overlay */}
-                    {isMenuOpen && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity"
-                            onClick={() => setIsMenuOpen(false)}
-                        />
-                    )}
+
 
                     {/* Settings Drawer */}
                     <div
-                        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-bg-panel shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-bg-panel shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out overflow-y-auto ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
                         style={{ backgroundColor: 'var(--bg-panel)' }}
                     >
                         <div className="p-6">
@@ -280,19 +275,32 @@ export const ConnectPage = () => {
                                             onChange={(e) => updateConfigField('asrprovider', e.target.value)}
                                             className="w-full px-3 py-2 rounded-lg bg-bg-input border border-border text-text-main"
                                         >
-                                            <option value="elevenlabs">ElevenLabs</option>
-                                            <option value="botnoi">Botnoi</option>
+                                            {ASR_PROVIDERS.map((provider) => (
+                                                <option key={provider.value} value={provider.value}>
+                                                    {provider.label}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-text-muted mb-1">ASR Language</label>
-                                        <input
-                                            type="text"
-                                            value={configData.asrlanguage || ''}
+                                        <select
+                                            value={configData.asrlanguage || 'th-TH'}
                                             onChange={(e) => updateConfigField('asrlanguage', e.target.value)}
                                             className="w-full px-3 py-2 rounded-lg bg-bg-input border border-border text-text-main"
-                                        />
+                                            style={{
+                                                backgroundColor: 'var(--bg-input)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-main)',
+                                            }}
+                                        >
+                                            {ASR_LANGUAGES.map((lang) => (
+                                                <option key={lang.value} value={lang.value}>
+                                                    {lang.label}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div className="h-px bg-border my-4" />
@@ -305,19 +313,32 @@ export const ConnectPage = () => {
                                             onChange={(e) => updateConfigField('ttsprovider', e.target.value)}
                                             className="w-full px-3 py-2 rounded-lg bg-bg-input border border-border text-text-main"
                                         >
-                                            <option value="botnoi">Botnoi</option>
-                                            <option value="elevenlabs">ElevenLabs</option>
+                                            {TTS_PROVIDERS.map((provider) => (
+                                                <option key={provider.value} value={provider.value}>
+                                                    {provider.label}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-text-muted mb-1">TTS Language</label>
-                                        <input
-                                            type="text"
-                                            value={configData.speakerlanguage || ''}
+                                        <select
+                                            value={configData.speakerlanguage || 'th'}
                                             onChange={(e) => updateConfigField('speakerlanguage', e.target.value)}
                                             className="w-full px-3 py-2 rounded-lg bg-bg-input border border-border text-text-main"
-                                        />
+                                            style={{
+                                                backgroundColor: 'var(--bg-input)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-main)',
+                                            }}
+                                        >
+                                            {TTS_LANGUAGES.map((lang) => (
+                                                <option key={lang.value} value={lang.value}>
+                                                    {lang.label}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div>

@@ -1,0 +1,61 @@
+export const ASR_PROVIDERS = [
+    { value: 'elevenlabs', label: 'ElevenLabs' },
+    { value: 'botnoi', label: 'Botnoi' },
+];
+
+export const TTS_PROVIDERS = [
+    { value: 'botnoi', label: 'Botnoi' },
+    { value: 'elevenlabs', label: 'ElevenLabs' },
+];
+
+export const ASR_LANGUAGES = [
+    { value: 'th-TH', label: 'Thai' },
+    { value: 'en-US', label: 'English' },
+    { value: 'fil-PH', label: 'Filipino' },
+    { value: 'pt-BR', label: 'Portuguese' },
+    { value: 'en-SG', label: 'Singapore' },
+    { value: 'tr-TR', label: 'Turkish' },
+    { value: 'lo-LA', label: 'Lao' },
+    { value: 'zh-CN', label: 'Chinese' },
+    { value: 'vi-VN', label: 'Vietnamese' },
+    { value: 'id-ID', label: 'Indonesian' },
+    { value: 'de-DE', label: 'German' },
+    { value: 'fr-FR', label: 'French' },
+    { value: 'ru-RU', label: 'Russian' },
+    { value: 'my-MM', label: 'Burmese' },
+    { value: 'km-KH', label: 'Cambodia' },
+    { value: 'es-ES', label: 'Spanish' },
+    { value: 'ms-MY', label: 'Malaysian' },
+    { value: 'nl-NL', label: 'Dutch' },
+    { value: 'ko-KR', label: 'Korean' },
+    { value: 'hi-IN', label: 'Hindi' },
+    { value: 'it-IT', label: 'Italian' },
+    { value: 'ja-JP', label: 'Japanese' },
+    { value: 'ar-SA', label: 'Arabic' },
+];
+
+export const TTS_LANGUAGES = [
+    { value: 'th', label: 'Thai' },
+    { value: 'en', label: 'English' },
+    { value: 'fil', label: 'Filipino' },
+    { value: 'pt', label: 'Portuguese' },
+    { value: 'en-SG', label: 'Singapore' },
+    { value: 'tr', label: 'Turkish' },
+    { value: 'lo', label: 'Lao' },
+    { value: 'zh', label: 'Chinese' },
+    { value: 'vi', label: 'Vietnamese' },
+    { value: 'id', label: 'Indonesian' },
+    { value: 'de', label: 'German' },
+    { value: 'fr', label: 'French' },
+    { value: 'ru', label: 'Russian' },
+    { value: 'my', label: 'Burmese' },
+    { value: 'km', label: 'Cambodia' },
+    { value: 'es', label: 'Spanish' },
+    { value: 'ms', label: 'Malaysian' },
+    { value: 'nl', label: 'Dutch' },
+    { value: 'ko', label: 'Korean' },
+    { value: 'hi', label: 'Hindi' },
+    { value: 'it', label: 'Italian' },
+    { value: 'ja', label: 'Japanese' },
+    { value: 'ar', label: 'Arabic' },
+];
