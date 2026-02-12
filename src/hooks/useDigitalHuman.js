@@ -29,6 +29,8 @@ export const useDigitalHuman = (appId, options = {}) => {
                 // If custom container is provided, use it
                 if (containerRef.current) {
                     initOptions.container = containerRef.current;
+                } else {
+                    console.warn('DigitalHuman: No container ref provided, falling back to default container.');
                 }
 
                 window.DigitalHuman.init(appId, initOptions);

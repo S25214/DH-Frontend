@@ -172,9 +172,11 @@ export const ConnectPage = () => {
                         minHeight: '600px',
                     }}
                 >
-                    {isConnected ? (
-                        <div ref={containerRef} className="w-full h-full min-h-[600px]" />
-                    ) : (
+                    {/* Main Container for DigitalHuman */}
+                    <div ref={containerRef} className="w-full h-full min-h-[600px]" style={{ display: isConnected ? 'block' : 'none' }} />
+
+                    {/* Placeholder / Connect Prompt */}
+                    {!isConnected && (
                         <div className="flex items-center justify-center h-[600px]">
                             <div className="text-center">
                                 <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-bg-input flex items-center justify-center">
