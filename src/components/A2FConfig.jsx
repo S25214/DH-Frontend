@@ -239,7 +239,7 @@ export const A2FConfig = ({
                                             <div className="flex items-center gap-2 min-w-[160px]">
                                                 <ToggleSwitch
                                                     checked={isEmotionOverrideEnabled(emotionType)}
-                                                    onChange={(checked) => handleEmotionOverrideToggle(emotionType, checked)}
+                                                    onChange={(e) => handleEmotionOverrideToggle(emotionType, e.target.checked)}
                                                 />
                                                 <span className="text-sm text-text-main capitalize">{emotionType}</span>
                                             </div>

@@ -28,7 +28,7 @@ const ConfigLayout = ({
     showDeleteButton = true // Default to true
 }) => {
     return (
-        <div className="min-h-screen flex" style={{ backgroundColor: 'var(--bg-body)' }}>
+        <div className="h-screen overflow-hidden flex" style={{ backgroundColor: 'var(--bg-body)' }}>
             <ToastContainer />
 
             {/* Sidebar */}
