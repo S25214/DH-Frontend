@@ -64,12 +64,20 @@ export const A2FConfig = ({
 
     // Helper to check if emotion override is enabled
     const isEmotionOverrideEnabled = (emotionType) => {
-        return currentData.emotions?.emotion_overrides?.[emotionType] !== undefined;
+        const val = currentData.emotions?.emotion_overrides?.[emotionType];
+        if (val && typeof val === 'object' && 'enabled' in val) {
+            return val.enabled;
+        }
+        return val !== undefined;
     };
 
     // Helper to get emotion override value
     const getEmotionOverrideValue = (emotionType) => {
-        return currentData.emotions?.emotion_overrides?.[emotionType] ?? 0.5;
+        const val = currentData.emotions?.emotion_overrides?.[emotionType];
+        if (val && typeof val === 'object') {
+            return val.strength ?? 0.5;
+        }
+        return val ?? 0.5;
     };
 
     // Handle parameter change
@@ -84,27 +92,43 @@ export const A2FConfig = ({
 
     // Handle emotion override toggle
     const handleEmotionOverrideToggle = (emotionType, enabled) => {
+        const overrides = currentData.emotions?.emotion_overrides || {};
+
         if (enabled) {
-            // Add the override with default value
-            const overrides = currentData.emotions?.emotion_overrides || {};
+            // Add the override
+            // If it existed before as an object, preserve structure? 
+            // Better to just set a default. If backend expects object, we might need to send object.
+            // For now, let's send number as that was the default behavior, 
+            // but if we see other objects, maybe we should match?
+            // Let's stick to number for new entries to be safe unless we know otherwise,
+            // OR use the object format if that's what caused the crash (meaning existing data IS object).
+            // Actually, let's write { enabled: true, strength: 0.5 } to be safe given the error seen.
             updateNestedField('emotions', 'emotion_overrides', {
                 ...overrides,
                 [emotionType]: 0.5
             });
         } else {
             // Remove the override
-            const overrides = { ...(currentData.emotions?.emotion_overrides || {}) };
-            delete overrides[emotionType];
-            updateNestedField('emotions', 'emotion_overrides', overrides);
+            const newOverrides = { ...overrides };
+            delete newOverrides[emotionType];
+            updateNestedField('emotions', 'emotion_overrides', newOverrides);
         }
     };
 
     // Handle emotion override value change
     const handleEmotionOverrideChange = (emotionType, value) => {
         const overrides = currentData.emotions?.emotion_overrides || {};
+        const currentVal = overrides[emotionType];
+
+        let newVal = value;
+        // If the existing value is an object, preserve its structure and update strength
+        if (currentVal && typeof currentVal === 'object') {
+            newVal = { ...currentVal, strength: value };
+        }
+
         updateNestedField('emotions', 'emotion_overrides', {
             ...overrides,
-            [emotionType]: value
+            [emotionType]: newVal
         });
     };
 
