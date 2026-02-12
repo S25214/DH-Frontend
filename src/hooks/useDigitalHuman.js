@@ -19,7 +19,7 @@ export const useDigitalHuman = (appId, options = {}) => {
         try {
             if (window.DigitalHuman) {
                 const initOptions = {
-                    autoUnmute: true,
+                    autoUnmute: false,
                     showUI: true,
                     lookAt: true,
                     microphone: true,
