@@ -1,5 +1,4 @@
 import React from 'react';
-import { ToastContainer } from './Toast';
 
 const ConfigLayout = ({
     // Sidebar Props
@@ -24,7 +23,8 @@ const ConfigLayout = ({
     handleDelete,
 
     // Content
-    children
+    children,
+    ToastContainer // Received as prop
 }) => {
     return (
         <div className="min-h-screen flex" style={{ backgroundColor: 'var(--bg-body)' }}>
