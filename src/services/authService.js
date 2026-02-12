@@ -95,16 +95,21 @@ export const exchangeTokenForBotnoi = async (user) => {
             throw new Error(`Token exchange failed: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const responseData = await response.json();
 
-        if (!data.token) {
+        // The API returns: { message: "...", data: { token: "...", url: "..." } }
+        // Extract token from the nested data object
+        const token = responseData.data?.token || responseData.token;
+
+        if (!token) {
+            console.error('API response:', responseData);
             throw new Error('No token received from Botnoi API');
         }
 
         // Store Botnoi token in sessionStorage
-        sessionStorage.setItem(BOTNOI_TOKEN_KEY, data.token);
+        sessionStorage.setItem(BOTNOI_TOKEN_KEY, token);
 
-        return data.token;
+        return token;
     } catch (error) {
         console.error('Error exchanging token:', error);
         throw error;
