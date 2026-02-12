@@ -24,7 +24,8 @@ const ConfigLayout = ({
 
     // Content
     children,
-    ToastContainer // Received as prop
+    ToastContainer, // Received as prop
+    showDeleteButton = true // Default to true
 }) => {
     return (
         <div className="min-h-screen flex" style={{ backgroundColor: 'var(--bg-body)' }}>
@@ -105,7 +106,7 @@ const ConfigLayout = ({
                                 {isCreating ? `Create New ${configType.toUpperCase()} Config` : `Edit: ${currentData.config_id}`}
                             </h1>
                             <div className="flex space-x-3">
-                                {!isCreating && (
+                                {!isCreating && showDeleteButton && (
                                     <button
                                         onClick={() => setShowDeleteModal(true)}
                                         className="px-6 py-2 rounded-lg font-medium text-white"

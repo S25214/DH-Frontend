@@ -143,6 +143,10 @@ export const Dashboard = () => {
                     }
                 });
 
+                // Default A2F and Customize if empty (User Request: "save as default")
+                if (!payload.a2f_config) payload.a2f_config = 'default';
+                if (!payload.customize) payload.customize = 'default';
+
                 // Handle objects - Keep them if they exist in state, regardless of enabled status (Data Preservation)
                 if (currentData.sheet) payload.sheet = currentData.sheet;
                 if (currentData.idle_config) payload.idle_config = currentData.idle_config;
@@ -210,7 +214,7 @@ export const Dashboard = () => {
                 if (currentData.hair) {
                     payload.hair = { ...currentData.hair };
                 } else {
-                    payload.hair = { name: "Pony Tail", color: "#555555" };
+                    payload.hair = { name: "Pony Tail", color: "#000000" };
                 }
             }
 
@@ -366,6 +370,8 @@ export const Dashboard = () => {
         }));
     };
 
+    const isDefaultProtected = selectedConfig === 'default' && ['a2f', 'customize'].includes(configType);
+
     return (
         <ConfigLayout
             configType={configType}
@@ -384,6 +390,7 @@ export const Dashboard = () => {
             setDeleteConfirmText={setDeleteConfirmText}
             handleDelete={handleDelete}
             ToastContainer={ToastContainer}
+            showDeleteButton={!isDefaultProtected}
         >
             {configType === 'a2f' && (
                 <A2FConfig
@@ -415,8 +422,8 @@ export const Dashboard = () => {
                     addIdleSentence={addIdleSentence}
                     updateIdleSentence={updateIdleSentence}
                     removeIdleSentence={removeIdleSentence}
-                    a2fConfigs={a2fConfigs}
-                    customizeConfigs={customizeConfigs}
+                    a2fConfigs={a2fConfigs.filter(id => id !== 'default')}
+                    customizeConfigs={customizeConfigs.filter(id => id !== 'default')}
                 />
             )}
         </ConfigLayout>

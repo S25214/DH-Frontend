@@ -106,7 +106,6 @@ export const DHConfig = ({
                                 }}
                             >
                                 <option value="">Select Config...</option>
-                                <option value="default">default (Manual)</option>
                                 {a2fConfigs.map(id => (
                                     <option key={id} value={id}>{id}</option>
                                 ))}
@@ -128,7 +127,6 @@ export const DHConfig = ({
                                 }}
                             >
                                 <option value="">Select Config...</option>
-                                <option value="default">default (Manual)</option>
                                 {customizeConfigs.map(id => (
                                     <option key={id} value={id}>{id}</option>
                                 ))}
