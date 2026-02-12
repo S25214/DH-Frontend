@@ -12,7 +12,6 @@ export const DHConfig = ({
     toggleTTSInjectConfig,
     addIdleSentence,
     updateIdleSentence,
-    updateIdleSentence,
     removeIdleSentence,
     a2fConfigs = [],
     customizeConfigs = []
